@@ -3,6 +3,9 @@ import React, { useState } from "react";
 function App() {
   const [todoText, setTodoText] = useState("");
   const [todos, setTodos] = useState([]);
+  const [isEdit, setIsEdit] = useState(false);
+  const [willUpdateTodo, setWillUpdateTodo] = useState("");
+
   const changeIsDone = (id) => {
     // console.log(id);
     const searchedTodo = todos.find((item) => item.id === id);
@@ -27,16 +30,32 @@ function App() {
       return;
     }
 
-    const newTodo = {
-      id: new Date().getTime(),
-      isDone: false,
-      text: todoText,
-      date: new Date(),
-    };
-    setTodos([newTodo, ...todos]);
-    setTodoText("");
-    //console.log(newTodo);
-    //console.log(todoText);
+    if (isEdit === true) {
+      console.table(willUpdateTodo, "todo güncellenecek");
+      const searchedTodo = todos.find((item) => item.id === willUpdateTodo);
+      const updatedTodo = {
+        ...searchedTodo,
+        text: todoText,
+      };
+
+      const filteredTodos = todos.filter((item) => item.id !== willUpdateTodo);
+      setTodos([...filteredTodos, updatedTodo]);
+      setTodoText("");
+      setIsEdit(false);
+      setWillUpdateTodo("");
+    } else {
+      const newTodo = {
+        id: new Date().getTime(),
+        isDone: false,
+        text: todoText,
+        date: new Date(),
+      };
+
+      setTodos([...todos, newTodo]);
+      setTodoText("");
+      //console.log(newTodo);
+      //console.log(todoText);
+    }
   };
 
   return (
@@ -53,8 +72,11 @@ function App() {
             aria-describedby="button-addon2"
             onChange={(event) => setTodoText(event.target.value)}
           />
-          <button className="btn btn-danger" type="submit">
-            Add
+          <button
+            className={`btn btn-${isEdit === true ? "success" : "danger"}`}
+            type="submit"
+          >
+            {isEdit === true ? "Edit" : "Add"}
           </button>
         </div>
       </form>
@@ -67,16 +89,30 @@ function App() {
           <>
             {todos.map((item) => (
               <div
-                className="alert alert-secondary d-flex justify-content-between align-items-center"
+                className={`alert alert-${
+                  item.isDone === true ? "success" : "info"
+                } d-flex justify-content-between align-items-center`}
                 role="alert"
               >
                 <p>{item.text}</p>
-                <button
-                  onClick={() => changeIsDone(item.id)}
-                  className="btn btn-sm btn-danger"
-                >
-                  {item.isDone === false ? "Done" : "Undone"}
-                </button>
+                <div>
+                  <button
+                    className="btn btn-success btn-sm mx-3 "
+                    onClick={() => {
+                      setIsEdit(true);
+                      setWillUpdateTodo(item.id);
+                      setTodoText(item.text);
+                    }}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => changeIsDone(item.id)}
+                    className="btn btn-sm btn-danger"
+                  >
+                    {item.isDone === false ? "Done" : "Undone"}
+                  </button>
+                </div>
               </div>
             ))}
           </>
