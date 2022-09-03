@@ -1,14 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import Todo from "./components/Todo";
+import TodoForm from "./components/TodoForm";
 
 function App() {
   const [todoText, setTodoText] = useState("");
   const [todos, setTodos] = useState([]);
   const [isEdit, setIsEdit] = useState(false);
   const [willUpdateTodo, setWillUpdateTodo] = useState("");
+
+  useEffect(() => {
+    const todosFromLocalStorage = localStorage.getItem("todos");
+    if (todosFromLocalStorage === null) {
+      localStorage.setItem("todos", JSON.stringify([]));
+    } else {
+      setTodos(JSON.parse(todosFromLocalStorage));
+    }
+  }, []);
+
   const deleteTodo = (id) => {
     //console.log(id);
     const filteredTodos = todos.filter((item) => item.id !== id);
     setTodos(filteredTodos);
+    localStorage.setItem("todos", JSON.stringify(filteredTodos));
   };
 
   const changeIsDone = (id) => {
@@ -20,6 +33,10 @@ function App() {
     };
     const filteredTodos = todos.filter((item) => item.id !== id);
     setTodos([updatedTodo, ...filteredTodos]);
+    localStorage.setItem(
+      "todos",
+      JSON.stringify([updatedTodo, ...filteredTodos])
+    );
   };
 
   const handleSubmit = (event) => {
@@ -45,6 +62,10 @@ function App() {
 
       const filteredTodos = todos.filter((item) => item.id !== willUpdateTodo);
       setTodos([...filteredTodos, updatedTodo]);
+      localStorage.setItem(
+        "todos",
+        JSON.stringify([...filteredTodos, updatedTodo])
+      );
       setTodoText("");
       setIsEdit(false);
       setWillUpdateTodo("");
@@ -57,6 +78,7 @@ function App() {
       };
 
       setTodos([...todos, newTodo]);
+      localStorage.setItem("todos", JSON.stringify([...todos, newTodo]));
       setTodoText("");
       //console.log(newTodo);
       //console.log(todoText);
@@ -66,25 +88,13 @@ function App() {
   return (
     <div className="container ">
       <h1 className="text-center my-5">Todo App</h1>
-      <form onSubmit={handleSubmit}>
-        <div className="input-group mb-3">
-          <input
-            value={todoText}
-            type="text"
-            className="form-control"
-            placeholder="Type Your Todo"
-            aria-label="Recipient's username"
-            aria-describedby="button-addon2"
-            onChange={(event) => setTodoText(event.target.value)}
-          />
-          <button
-            className={`btn btn-${isEdit === true ? "success" : "danger"}`}
-            type="submit"
-          >
-            {isEdit === true ? "Edit" : "Add"}
-          </button>
-        </div>
-      </form>
+      <TodoForm
+        handleSubmit={handleSubmit}
+        todoText={todoText}
+        setTodoText={setTodoText}
+        isEdit={isEdit}
+      />
+
       <div>
         {todos.length <= 0 ? (
           <p className="text-center my-5 mx-5 fs-1 bg-warning  px-5 rounded-pill">
@@ -93,38 +103,14 @@ function App() {
         ) : (
           <>
             {todos.map((item) => (
-              <div
-                className={`alert alert-${
-                  item.isDone === true ? "success" : "info"
-                } d-flex justify-content-between align-items-center`}
-                role="alert"
-              >
-                <p>{item.text}</p>
-                <div>
-                  <button
-                    onClick={() => deleteTodo(item.id)}
-                    className="btn btn-sm btn-danger"
-                  >
-                    Delete
-                  </button>
-                  <button
-                    className="btn btn-primary btn-sm mx-3 "
-                    onClick={() => {
-                      setIsEdit(true);
-                      setWillUpdateTodo(item.id);
-                      setTodoText(item.text);
-                    }}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => changeIsDone(item.id)}
-                    className="btn btn-sm btn-success"
-                  >
-                    {item.isDone === false ? "Done" : "Undone"}
-                  </button>
-                </div>
-              </div>
+              <Todo
+                item={item}
+                deleteTodo={deleteTodo}
+                setIsEdit={setIsEdit}
+                setWillUpdateTodo={setWillUpdateTodo}
+                setTodoText={setTodoText}
+                changeIsDone={changeIsDone}
+              />
             ))}
           </>
         )}
