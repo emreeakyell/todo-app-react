@@ -5,6 +5,11 @@ function App() {
   const [todos, setTodos] = useState([]);
   const [isEdit, setIsEdit] = useState(false);
   const [willUpdateTodo, setWillUpdateTodo] = useState("");
+  const deleteTodo = (id) => {
+    //console.log(id);
+    const filteredTodos = todos.filter((item) => item.id !== id);
+    setTodos(filteredTodos);
+  };
 
   const changeIsDone = (id) => {
     // console.log(id);
@@ -59,7 +64,7 @@ function App() {
   };
 
   return (
-    <div className="container">
+    <div className="container ">
       <h1 className="text-center my-5">Todo App</h1>
       <form onSubmit={handleSubmit}>
         <div className="input-group mb-3">
@@ -82,7 +87,7 @@ function App() {
       </form>
       <div>
         {todos.length <= 0 ? (
-          <p className="text-center my-5 mx-5 fs-1 badge bg-warning text-wrap px-5">
+          <p className="text-center my-5 mx-5 fs-1 bg-warning  px-5 rounded-pill">
             !!List Is Empty!!
           </p>
         ) : (
@@ -97,7 +102,13 @@ function App() {
                 <p>{item.text}</p>
                 <div>
                   <button
-                    className="btn btn-success btn-sm mx-3 "
+                    onClick={() => deleteTodo(item.id)}
+                    className="btn btn-sm btn-danger"
+                  >
+                    Delete
+                  </button>
+                  <button
+                    className="btn btn-primary btn-sm mx-3 "
                     onClick={() => {
                       setIsEdit(true);
                       setWillUpdateTodo(item.id);
@@ -108,7 +119,7 @@ function App() {
                   </button>
                   <button
                     onClick={() => changeIsDone(item.id)}
-                    className="btn btn-sm btn-danger"
+                    className="btn btn-sm btn-success"
                   >
                     {item.isDone === false ? "Done" : "Undone"}
                   </button>
